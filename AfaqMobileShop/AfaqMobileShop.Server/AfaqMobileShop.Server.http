@@ -1,0 +1,6 @@
+@AfaqMobileShop.Server_HostAddress = http://localhost:5096
+
+GET {{AfaqMobileShop.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

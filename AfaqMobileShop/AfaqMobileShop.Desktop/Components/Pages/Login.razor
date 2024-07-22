@@ -1,0 +1,75 @@
+﻿@page "/"
+@using AfaqMobileShop.Desktop.Components.Layout
+@using AfaqMobileShop.Desktop.Data
+@using AfaqMobileShop.Shared.DTO
+@using Radzen;
+@layout LoginLayout;
+@inject IServerContext sc;
+@inject NavigationManager nav;
+@inject DialogService ds;
+
+<div class="limiter">
+    <div class="container-login100">
+        <div class="wrap-login100">
+            <form class="login100-form validate-form">
+                <div style="margin:0px auto 20px auto; width: 175px;">
+                    @* <img src="/logo-removebg-preview.png" style="width: 100%; height: auto; object-fit:cover;" /> *@
+                </div>
+                <span class="login100-form-title p-b-26">
+                    Admin Login
+                </span>
+                <div class="wrap-input100 validate-input" data-validate="Valid email is: a@b.c">
+                    <input class="input100" placeholder="User Name" type="text" @bind="@loginDTO.UserName">
+                </div>
+
+                <div class="wrap-input100 validate-input" data-validate="Enter password">
+                    <input class="input100" placeholder="Enter Password" type="password" @bind="@loginDTO.Password">
+                    @*   <span class="focus-input100" data-placeholder="Password"></span> *@
+                </div>
+
+                <div class="container-login100-form-btn">
+                    <div class="wrap-login100-form-btn">
+                        <div class="login100-form-bgbtn"></div>
+                        <button type="button" @onclick="HandleValidSubmit" class="login100-form-btn">
+                            @ButtonText
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private LoginDTO loginDTO = new LoginDTO();
+    private string ButtonText = "Login";
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(loginDTO.UserName))
+        {
+            await ds.Alert("Please Enter Username", "Error", new AlertOptions { OkButtonText = "Ok" });
+            return;
+
+        }
+        if (string.IsNullOrEmpty(loginDTO.Password))
+        {
+            await ds.Alert("Please Enter Password", "Error", new AlertOptions { OkButtonText = "Ok" });
+            return;
+
+        }
+        ButtonText = "Loading....";
+        var response = await sc.UserLogin(loginDTO);
+        if (response.IsSuccess)
+        {
+            nav.NavigateTo("/Dashboard");
+        }
+        else
+        {
+            ButtonText = "Login";
+
+            await ds.Alert("Username or Password is Incorrect", "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+    }
+}

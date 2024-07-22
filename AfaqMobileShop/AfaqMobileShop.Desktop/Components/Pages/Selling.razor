@@ -1,0 +1,139 @@
+﻿        @page "/Selling"
+        @using AfaqMobileShop.Desktop.Data
+        @using AfaqMobileShop.Shared.DTO
+        @using AfaqMobileShop.Shared.Models
+        @using Radzen;
+        @inject Radzen.DialogService dialogService;
+        @inject ContextMenuService ContextMenuService;
+        @inject IServerContext serverContext;
+
+
+        <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3>Sales</h3>
+    <!-- Button next to the right side of Sales -->
+                 <button class="btn btn-primary ml-auto" @onclick="OpenAddSaleModal"><i class="bi bi-plus-circle"></i> Add Sell</button>
+               </div>
+    <RadzenDataGrid @ref="grid" TItem="Sell" FilterMode="FilterMode.Simple" CellContextMenu="@OnCellContextMenu" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" AllowFiltering="true" AllowColumnResize="true" Data="@_sell">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Sell" Property="Id" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Name" Title="Name" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="CNIC" Title="CNIC" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Address" Title="Address" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="IMEI1" Title="IMEI1" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="IMEI2" Title="IMEI2" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="SellDate" Title="SellDate" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Price" Title="Price" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Warranty" Title="Warranty" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Garranty" Title="Garranty" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Wasol" Title="Wasol" Width="100px" />
+                    <RadzenDataGridColumn TItem="Sell" Property="Baqaya" Title="Baqaya" Width="100px" />
+                </Columns>
+            </RadzenDataGrid>
+         </div>
+@code {
+    RadzenDataGrid<Sell> grid;
+    IEnumerable<SellDTO> sales;
+    IList<SellDTO> selectedSales;
+    List<Sell> _sell;
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadSells();
+    }
+    async Task LoadSells()
+    {
+        StateHasChanged();
+        _sell = await serverContext.GetSalesAsync();
+        StateHasChanged();
+    }
+    async Task OpenAddSaleModal()
+    {
+        var result = await OpenSaleModal("Add Sell", null);
+        if(result!=null && result)
+        {
+            await LoadSells();
+        }
+    }
+    async Task OpenEditSellModal(int Id)
+    {
+        var result = await OpenSaleModal("Edit Sell", new Dictionary<string, object> { { "Id", Id } });
+        if (result != null && result)
+        {
+            await LoadSells();
+        }
+    }
+    async Task DeleteSell(Sell sell)
+    {
+        try
+        {
+            var result = await dialogService.Confirm($"Are you sure to delete {sell.Name} ?", "Deletion", new ConfirmOptions
+                {
+                    OkButtonText = "Yes",
+                    CancelButtonText = "No"
+                });
+
+            if (result.Value)
+            {
+                await serverContext.DeleteSellAsync(sell.Id);
+                await dialogService.Alert("Sell Deleted", "Successfully", new AlertOptions { OkButtonText = "Ok" });
+                await LoadSells();
+            }
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+    }
+    async Task OpenViewSellModal(Sell sell)
+    {
+        await OpenSaleModal("View Sell", new Dictionary<string, object> { { "Id", sell.Id }, { "EditedMode", false } });
+
+    }
+    async Task<dynamic> OpenSaleModal(string title, Dictionary<string, object> parameters)
+            {
+                try
+                {
+                    var result = await dialogService.OpenAsync<AddSelling>(title,
+                        parameters,
+                        new DialogOptions { Width = "40%", Height = "70%", Resizable = true, Draggable = true });
+
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+                }
+                return false;
+            }
+    async Task OnCellContextMenu(DataGridCellMouseEventArgs<Sell> args)
+    {
+        _sell = new List<Sell> { args.Data };
+        var contextMenue = new List<ContextMenuItem>
+                {
+                new ContextMenuItem { Text = "Edit", Value = 1, Icon = "launch" },
+                new ContextMenuItem { Text = "Delete", Value = 2, Icon = "delete" },
+                new ContextMenuItem { Text = "View", Value = 3, Icon = "info" }
+                };
+       
+
+        ContextMenuService.Open(args,
+            contextMenue
+            ,
+            async (e) =>
+            {
+                switch ((int)e.Value)
+                {
+                    case 1:
+                        await OpenEditSellModal(args.Data.Id);
+                        break;
+                    case 2:
+                        await DeleteSell(args.Data);
+                        break;
+                    case 3:
+                        await OpenViewSellModal(args.Data);
+                        break;
+                }
+            });
+    }
+        }

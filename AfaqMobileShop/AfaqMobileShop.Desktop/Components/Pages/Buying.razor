@@ -1,0 +1,139 @@
+﻿@page "/Buying"
+ @using AfaqMobileShop.Desktop.Data
+        @using AfaqMobileShop.Shared.DTO
+        @using AfaqMobileShop.Shared.Models
+        @using Radzen;
+        @inject Radzen.DialogService dialogService;
+        @inject ContextMenuService ContextMenuService;
+        @inject IServerContext serverContext;
+
+
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Buyings</h3>
+        <!-- Button next to the right side of Sales -->
+        <button class="btn btn-primary ml-auto" @onclick="OpenAddBuyModal"><i class="bi bi-plus-circle"></i> Add Buy</button>
+    </div>
+    <RadzenDataGrid @ref="grid" TItem="Buy" FilterMode="FilterMode.Simple" CellContextMenu="@OnCellContextMenu" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" AllowFiltering="true" AllowColumnResize="true" Data="@_buy">
+        <Columns>
+            <RadzenDataGridColumn TItem="Buy" Property="Id" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="Buy" Property="Name" Title="Name" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="FName" Title="FName" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="CNIC" Title="CNIC" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="MobileNumber" Title="MobileNumber" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="Adrss" Title="Adrss" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="IMEI1" Title="IMEI1" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="IMEI2" Title="IMEI2" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="CNICPicture" Title="CNICPicture" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="Date" Title="Date" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="PurchasePrice" Title="PurchasePrice" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="Specs" Title="Specs" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="Color" Title="Color" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Property="MobileModel" Title="MobileModel" Width="100px" />
+        </Columns>
+    </RadzenDataGrid>
+</div>
+@code {
+    RadzenDataGrid<Buy> grid;
+    List<Buy> _buy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadBuyers();
+    }
+    async Task LoadBuyers()
+    {
+        StateHasChanged();
+        _buy = await serverContext.GetBuyersAsync();
+        StateHasChanged();
+    }
+    async Task OpenAddBuyModal()
+    {
+        var result = await OpenBuyModal("Add Buy", null);
+        if (result != null && result)
+        {
+            await LoadBuyers();
+        }
+    }
+    async Task OpenEditBuyModal(int Id)
+    {
+        var result = await OpenBuyModal("Edit Buy", new Dictionary<string, object> { { "Id", Id } });
+        if (result != null && result)
+        {
+            await LoadBuyers();
+        }
+    }
+    async Task DeleteBuy(Buy buy)
+    {
+        try
+        {
+            var result = await dialogService.Confirm($"Are you sure to delete {buy.Name} ?", "Deletion", new ConfirmOptions
+                {
+                    OkButtonText = "Yes",
+                    CancelButtonText = "No"
+                });
+
+            if (result.Value)
+            {
+                await serverContext.DeleteBuyAsync(buy.Id);
+                await dialogService.Alert("Buy Deleted", "Successfully", new AlertOptions { OkButtonText = "Ok" });
+                await LoadBuyers();
+            }
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+    }
+    async Task OpenViewBuyModal(Buy buy)
+    {
+        await OpenBuyModal("View Buy", new Dictionary<string, object> { { "Id", buy.Id }, { "EditedMode", false } });
+
+    }
+    async Task<dynamic> OpenBuyModal(string title, Dictionary<string, object> parameters)
+    {
+        try
+        {
+            var result = await dialogService.OpenAsync<AddBuying>(title,
+                parameters,
+                new DialogOptions { Width = "40%", Height = "70%", Resizable = true, Draggable = true });
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+        return false;
+    }
+    async Task OnCellContextMenu(DataGridCellMouseEventArgs<Buy> args)
+    {
+        _buy = new List<Buy> { args.Data };
+        var contextMenue = new List<ContextMenuItem>
+                {
+                new ContextMenuItem { Text = "Edit", Value = 1, Icon = "launch" },
+                new ContextMenuItem { Text = "Delete", Value = 2, Icon = "delete" },
+                new ContextMenuItem { Text = "View", Value = 3, Icon = "info" }
+                };
+
+
+        ContextMenuService.Open(args,
+            contextMenue
+            ,
+            async (e) =>
+            {
+                switch ((int)e.Value)
+                {
+                    case 1:
+                        await OpenEditBuyModal(args.Data.Id);
+                        break;
+                    case 2:
+                        await DeleteBuy(args.Data);
+                        break;
+                    case 3:
+                        await OpenViewBuyModal(args.Data);
+                        break;
+                }
+            });
+    }
+}

@@ -1,0 +1,122 @@
+﻿@page "/AddBuying"
+@using AfaqMobileShop.Desktop.Data
+@using AfaqMobileShop.Shared.DTO
+@using AfaqMobileShop.Shared.Models
+@using Radzen;
+@inject Radzen.DialogService dialogService;
+@inject IServerContext serverContext;
+
+<div class="container">
+    <div class="form-group">
+        <label for="Name">Seller Name</label>
+        <input type="text" class="form-control" id="Name" @bind="@newBuyer.Name" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="FName">Seller Father Name</label>
+        <input type="text" class="form-control" id="FName" @bind="@newBuyer.FName" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="CNIC">Seller CNIC</label>
+        <input type="text" class="form-control" id="CNIC" @bind="@newBuyer.CNIC" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="Adrss">Seller Address</label>
+        <input type="text" class="form-control" id="Adrss" @bind="@newBuyer.Adrss" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="IMEI1">Mobile IMEI1</label>
+        <input type="text" class="form-control" id="IMEI1" @bind="@newBuyer.IMEI1" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="IMEI2">Mobile IMEI2</label>
+        <input type="text" class="form-control" id="IMEI2" @bind="@newBuyer.IMEI2" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="MobileNumber">Seller Mobile Number</label>
+        <input type="text" class="form-control" id="MobileNumber" @bind="@newBuyer.MobileNumber" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="Date">Buy Date</label>
+        <input type="date" class="form-control" id="Date" @bind="@newBuyer.Date" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="PurchasePrice">Purchase Price</label>
+        <input type="text" class="form-control" id="PurchasePrice" @bind="@newBuyer.PurchasePrice" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="CNICPicture">CNIC Picture</label>
+        <input type="file" class="form-control" id="CNICPicture" @bind="@newBuyer.CNICPicture" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="Color">Mobile Color</label>
+        <input type="text" class="form-control" id="Color" @bind="@newBuyer.Color" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="Specs">Wasol Price</label>
+        <input type="text" class="form-control" id="Specs" @bind="@newBuyer.Specs" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="MobileModel">Mobile Model</label>
+        <input type="text" class="form-control" id="MobileModel" @bind="@newBuyer.MobileModel" disabled="@(!EditedMode)" />
+    </div>
+    @if (EditedMode)
+    {
+        <button class="btn btn-primary" @onclick="SaveBuy">@ButtonValue</button>
+        <button class="btn btn-primary" @onclick="@CloseModal">Cancel</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="@CloseModal">Close</button>
+    }
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public bool EditedMode { get; set; } = true;
+
+    private string showError = string.Empty;
+    private string ButtonValue = "Save";
+
+    protected async override Task OnInitializedAsync()
+    {
+        Buyers = await serverContext.GetBuyersAsync();
+        if (Id > 0)
+        {
+
+            ButtonValue = "Update";
+          //  newBuyer = await serverContext.GetBuyAsync(Id);
+        }
+    }
+    IEnumerable<Buy> Buyers;
+    BuyDTO newBuyer = new BuyDTO();
+
+    async Task SaveBuy()
+    {
+        // try
+        // {
+
+        //     var result = Id == 0 ? await serverContext.CreateBuyAsync(newBuyer) : await serverContext.UpdateBuyAsync(Id, newBuyer);
+        //     if (result != null)
+        //     {
+        //         await dialogService.Alert($"Buy {(Id == 0 ? "Created" : "Updated")} Successfully", "Success", new AlertOptions() { OkButtonText = "Ok" });
+        //         dialogService.Close(true);
+        //     }
+
+        // }
+        // catch (Exception ex)
+        // {
+        //     await dialogService.Alert(ex.Message, "Error");
+        // }
+    }
+
+    async Task CloseModal()
+    {
+        dialogService.Close(false);
+    }
+}
+
