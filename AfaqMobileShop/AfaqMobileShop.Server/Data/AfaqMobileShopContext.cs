@@ -15,9 +15,33 @@ namespace AfaqMobileShop.Server.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Buy> Buying { get; set; }
+        public DbSet<Stock> Stocks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Stock>().HasData(
+                new Stock()
+                {
+                    Id = 1,
+                    MobileName = "Infinix",
+                    Quantity = 3,
+
+                },
+                new Stock()
+                {
+                     Id = 2,
+                     MobileName = "realme",
+                     Quantity = 5,
+
+                },
+                new Stock()
+                {                                
+                     Id = 3,                          
+                     MobileName = "Techno",                                    
+                     Quantity = 4,
+
+                }
+                );
             modelBuilder.Entity<Buy>().HasData(
                 new Buy()
                 {

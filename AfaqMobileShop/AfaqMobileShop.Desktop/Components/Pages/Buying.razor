@@ -1,5 +1,6 @@
 ﻿@page "/Buying"
  @using AfaqMobileShop.Desktop.Data
+@using AfaqMobileShop.Shared
         @using AfaqMobileShop.Shared.DTO
         @using AfaqMobileShop.Shared.Models
         @using Radzen;
@@ -24,7 +25,15 @@
             <RadzenDataGridColumn TItem="Buy" Property="Adrss" Title="Adrss" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="IMEI1" Title="IMEI1" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="IMEI2" Title="IMEI2" Width="100px" />
-            <RadzenDataGridColumn TItem="Buy" Property="CNICPicture" Title="CNICPicture" Width="100px" />
+            <RadzenDataGridColumn TItem="Buy" Title="CNIC Picture" Width="100px">
+                <Template Context="data">
+                    @if (data.CNICPicture != null)
+                    {
+                        <img src="@Helper.ConvertToBase64(data.CNICPicture)" alt="CNIC Picture" width="100" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
             <RadzenDataGridColumn TItem="Buy" Property="Date" Title="Date" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="PurchasePrice" Title="PurchasePrice" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="Specs" Title="Specs" Width="100px" />
@@ -136,4 +145,5 @@
                 }
             });
     }
+   
 }

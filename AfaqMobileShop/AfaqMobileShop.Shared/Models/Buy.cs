@@ -21,6 +21,7 @@ namespace AfaqMobileShop.Shared.Models
         public string Color { get; set; }
         public int PurchasePrice { get; set; }
         public string MobileModel { get; set; }
+     
 
-    }
+}
 }

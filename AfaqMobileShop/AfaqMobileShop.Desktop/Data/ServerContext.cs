@@ -22,6 +22,11 @@ namespace AfaqMobileShop.Desktop.Data
         Task<Buy> CreateBuyAsync(Buy buy);
         Task<Buy> UpdateBuyAsync(int id, Buy buy);
         Task<bool> DeleteBuyAsync(int id);
+        Task<List<Stock>> GetStocksAsync();
+        Task<Stock> GetStockAsync(int id);
+        Task<Stock> CreateStockAsync(Stock stock);
+        Task<Stock> UpdateStockAsync(int id, Stock stock);
+        Task<bool> DeleteStockAsync(int id);
     }
     public class ServerContext : IServerContext
     {
@@ -128,6 +133,42 @@ namespace AfaqMobileShop.Desktop.Data
             var response = await _httpClient.DeleteAsync($"api/buys/{id}");
             response.EnsureSuccessStatusCode();
             return  response.IsSuccessStatusCode;
+        }
+
+        public async Task<List<Stock>> GetStocksAsync()
+        {
+            var response = await _httpClient.GetAsync("api/stocks");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<Stock>>();
+        }
+
+        public async Task<Stock> GetStockAsync(int id)
+        {
+            var response = await _httpClient.GetAsync($"api/stocks/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Stock>();
+
+        }
+
+        public async Task<Stock> CreateStockAsync(Stock stock)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/stocks", stock);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Stock>();
+        }
+
+        public async Task<Stock> UpdateStockAsync(int id, Stock stock)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"api/buys/{id}", stock);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Stock>();
+        }
+
+        public async Task<bool> DeleteStockAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"api/stocks/{id}");
+            response.EnsureSuccessStatusCode();
+            return response.IsSuccessStatusCode;
         }
     }
 }

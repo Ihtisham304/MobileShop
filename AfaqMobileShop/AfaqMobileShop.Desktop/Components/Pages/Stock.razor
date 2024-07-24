@@ -1,0 +1,129 @@
+﻿@page "/AddStock"
+@using AfaqMobileShop.Desktop.Data
+@using AfaqMobileShop.Shared.DTO
+@using AfaqMobileShop.Shared.Models
+@using Radzen;
+@inject Radzen.DialogService dialogService;
+@inject ContextMenuService ContextMenuService;
+@inject IServerContext serverContext;
+
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Sales</h3>
+        <!-- Button next to the right side of Sales -->
+        <button class="btn btn-primary ml-auto" @onclick="OpenAddStockModal"><i class="bi bi-plus-circle"></i> Add Stock</button>
+    </div>
+    <RadzenDataGrid @ref="grid" TItem="Stock" FilterMode="FilterMode.Simple" CellContextMenu="@OnCellContextMenu" PageSize="10" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" AllowPaging="true" AllowFiltering="true" AllowColumnResize="true" Data="@_stock">
+        <Columns>
+            <RadzenDataGridColumn TItem="Stock" Property="Id" Title="ID" Frozen="true" Width="50px" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn TItem="Stock" Property="MobileName" Title="MobileName" Width="100px" />
+            <RadzenDataGridColumn TItem="Stock" Property="Quantity" Title="Quantity" Width="100px" />
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+    RadzenDataGrid<Stock> grid;
+    IEnumerable<StockDTO> stocks;
+    IList<StockDTO> selectedStocks;
+    List<Stock> _stock;
+    protected override async Task OnInitializedAsync()
+    {
+        LoadStocks();
+    }
+    async Task LoadStocks()
+    {
+        StateHasChanged();
+        _stock = await serverContext.GetStocksAsync();
+        StateHasChanged();
+    }
+    async Task OpenAddStockModal()
+    {
+        var result = await OpenStockModal("Add Stock", null);
+        if (result != null && result)
+        {
+            await LoadStocks();
+        }
+    }
+    async Task OpenEditStockModal(int Id)
+    {
+        var result = await OpenStockModal("Edit Stock", new Dictionary<string, object> { { "Id", Id } });
+        if (result != null && result)
+        {
+            await LoadStocks();
+        }
+    }
+    async Task DeleteStock(Stock stock)
+    {
+        try
+        {
+            var result = await dialogService.Confirm($"Are you sure to delete {stock.MobileName} ?", "Deletion", new ConfirmOptions
+                {
+                    OkButtonText = "Yes",
+                    CancelButtonText = "No"
+                });
+
+            if (result.Value)
+            {
+                await serverContext.DeleteStockAsync(stock.Id);
+                await dialogService.Alert("Stock Deleted", "Successfully", new AlertOptions { OkButtonText = "Ok" });
+                await LoadStocks();
+            }
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+    }
+    async Task OpenViewStockModal(Stock stock)
+    {
+        await OpenStockModal("View Stock", new Dictionary<string, object> { { "Id", stock.Id }, { "EditedMode", false } });
+
+    }
+    async Task<dynamic> OpenStockModal(string title, Dictionary<string, object> parameters)
+    {
+        try
+        {
+            var result = await dialogService.OpenAsync<AddStock>(title,
+                parameters,
+                new DialogOptions { Width = "40%", Height = "70%", Resizable = true, Draggable = true });
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error", new AlertOptions { OkButtonText = "Ok" });
+        }
+        return false;
+    }
+    async Task OnCellContextMenu(DataGridCellMouseEventArgs<Stock> args)
+    {
+        _stock = new List<Stock> { args.Data };
+        var contextMenue = new List<ContextMenuItem>
+                {
+                new ContextMenuItem { Text = "Edit", Value = 1, Icon = "launch" },
+                new ContextMenuItem { Text = "Delete", Value = 2, Icon = "delete" },
+                new ContextMenuItem { Text = "View", Value = 3, Icon = "info" }
+                };
+
+
+        ContextMenuService.Open(args,
+            contextMenue
+            ,
+            async (e) =>
+            {
+                switch ((int)e.Value)
+                {
+                    case 1:
+                        await OpenEditStockModal(args.Data.Id);
+                        break;
+                    case 2:
+                        await DeleteStock(args.Data);
+                        break;
+                    case 3:
+                        await OpenViewStockModal(args.Data);
+                        break;
+                }
+            });
+    }
+}

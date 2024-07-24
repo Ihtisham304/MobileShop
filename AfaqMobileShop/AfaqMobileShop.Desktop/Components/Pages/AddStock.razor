@@ -1,0 +1,75 @@
+﻿@page "/Stock"
+@using AfaqMobileShop.Desktop.Data
+@using AfaqMobileShop.Shared.Models
+@using Radzen;
+@inject Radzen.DialogService dialogService;
+@inject IServerContext serverContext;
+
+<div class="container">
+    <div class="form-group">
+        <label for="MobileName">Mobile Name</label>
+        <input type="text" class="form-control" id="MobileName" @bind="@newStock.MobileName" disabled="@(!EditedMode)" />
+    </div>
+    <div class="form-group">
+        <label for="Quantity">Quantity</label>
+        <input type="text" class="form-control" id="Quantity" @bind="@newStock.Quantity" disabled="@(!EditedMode)" />
+    </div>
+    @if (EditedMode)
+    {
+        <button class="btn btn-primary" @onclick="SaveStock">@ButtonValue</button>
+        <button class="btn btn-primary" @onclick="@CloseModal">Cancel</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="@CloseModal">Close</button>
+    }
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public bool EditedMode { get; set; } = true;
+
+    private string showError = string.Empty;
+    private string ButtonValue = "Save";
+
+    protected async override Task OnInitializedAsync()
+    {
+        Stocks = await serverContext.GetStocksAsync();
+        if (Id > 0)
+        {
+
+            ButtonValue = "Update";
+            newStock = await serverContext.GetStockAsync(Id);
+        }
+    }
+    IEnumerable<Stock> Stocks;
+    Stock newStock = new Stock();
+
+    async Task SaveStock()
+    {
+        try
+        {
+            var result = Id == 0 ? await serverContext.CreateStockAsync(newStock) : await serverContext.UpdateStockAsync(Id, newStock);
+            if (result != null)
+            {
+                await dialogService.Alert($"Stock {(Id == 0 ? "Created" : "Updated")} Successfully", "Success", new AlertOptions() { OkButtonText = "Ok" });
+                dialogService.Close(true);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            await dialogService.Alert(ex.Message, "Error");
+        }
+    }
+
+    async Task CloseModal()
+    {
+        dialogService.Close(false);
+    }
+}

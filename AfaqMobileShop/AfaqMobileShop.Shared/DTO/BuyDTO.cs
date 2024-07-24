@@ -17,7 +17,7 @@ namespace AfaqMobileShop.Shared.DTO
         public string Adrss { get; set; }
         public string IMEI1 { get; set; }
         public string IMEI2 { get; set; }
-        public byte[] CNICPicture { get; set; }
+        public byte[] CNICPicture { get; set; } = new byte[byte.MaxValue];
         public string Specs { get; set; }
         public string Color { get; set; }
         public int PurchasePrice { get; set; }
