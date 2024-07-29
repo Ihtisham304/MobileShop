@@ -17,7 +17,7 @@ namespace AfaqMobileShop.Server.Controllers
             _context = context;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<StockDTO>>> GetStocks()
+        public async Task<ActionResult<IEnumerable<Stock>>> GetStocks()
         {
             var stocks = _context.Stocks.ToList();
 
@@ -26,7 +26,7 @@ namespace AfaqMobileShop.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<StockDTO>> GetStock(int id)
         {
-            var stock = _context.Stocks.SingleOrDefaultAsync(s => s.Id == id);
+            var stock = await _context.Stocks.SingleOrDefaultAsync(s => s.Id == id);
             if (stock == null)
             {
                 NotFound();
@@ -43,7 +43,7 @@ namespace AfaqMobileShop.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStock(int id,Stock stock)
         {
-            if (id== null)
+            if (id!= stock.Id)
             {
                 return BadRequest();
             }
@@ -70,5 +70,13 @@ namespace AfaqMobileShop.Server.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpGet("totalstocks")]
+        public async Task<IActionResult> GetTotalQuantity()
+        {
+            var quantity = await _context.Stocks.SumAsync(m => m.Quantity);
+            return Ok(quantity);
+        }
+
     }
+
 }

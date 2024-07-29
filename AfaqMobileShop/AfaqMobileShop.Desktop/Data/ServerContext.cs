@@ -27,6 +27,10 @@ namespace AfaqMobileShop.Desktop.Data
         Task<Stock> CreateStockAsync(Stock stock);
         Task<Stock> UpdateStockAsync(int id, Stock stock);
         Task<bool> DeleteStockAsync(int id);
+        Task<int> GetTotalQuantityStockAsync();
+        Task<int> GetTotalSalesAsync();
+        Task<int> GetTotalBuyersAsync();
+        Task<APIResponseDTO> ChangePassword(ChangePasswordDTO model);
     }
     public class ServerContext : IServerContext
     {
@@ -60,7 +64,6 @@ namespace AfaqMobileShop.Desktop.Data
             response.EnsureSuccessStatusCode(); // Throw exception if not successful
             return response.IsSuccessStatusCode;
         }
-
         public async Task<Sell> GetSaleAsync(int id)
         {
             var response = await _httpClient.GetAsync($"api/sells/{id}");
@@ -159,7 +162,7 @@ namespace AfaqMobileShop.Desktop.Data
 
         public async Task<Stock> UpdateStockAsync(int id, Stock stock)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/buys/{id}", stock);
+            var response = await _httpClient.PutAsJsonAsync($"api/stocks/{id}", stock);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<Stock>();
         }
@@ -169,6 +172,42 @@ namespace AfaqMobileShop.Desktop.Data
             var response = await _httpClient.DeleteAsync($"api/stocks/{id}");
             response.EnsureSuccessStatusCode();
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<int> GetTotalQuantityStockAsync()
+        {
+            var response = await _httpClient.GetAsync("api/stocks/totalstocks");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<int>();
+        }
+
+        public async Task<int> GetTotalSalesAsync()
+        {
+            var response = await _httpClient.GetAsync("api/sells/totalselling");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<int>();
+        }
+        public async Task<int> GetTotalBuyersAsync()
+        {
+            var response = await _httpClient.GetAsync("api/buys/totalbuying");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<int>();
+        }
+
+        public async Task<APIResponseDTO> ChangePassword(ChangePasswordDTO model)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/user/ChangePassword",model);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<APIResponseDTO>();
+                
+                return result;
+            }
+            return new APIResponseDTO
+            {
+                IsSuccess = false,
+                Message = "Something went wrong please contact developers"
+            };
         }
     }
 }

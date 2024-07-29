@@ -25,11 +25,11 @@
             <RadzenDataGridColumn TItem="Buy" Property="Adrss" Title="Adrss" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="IMEI1" Title="IMEI1" Width="100px" />
             <RadzenDataGridColumn TItem="Buy" Property="IMEI2" Title="IMEI2" Width="100px" />
-            <RadzenDataGridColumn TItem="Buy" Title="CNIC Picture" Width="100px">
+            <RadzenDataGridColumn TItem="Buy" Title="CNIC Picture" Width="80px">
                 <Template Context="data">
                     @if (data.CNICPicture != null)
                     {
-                        <img src="@Helper.ConvertToBase64(data.CNICPicture)" alt="CNIC Picture" width="100" />
+                        <img src="@Helper.ConvertToBase64(data.CNICPicture)" alt="CNIC Picture" width="80" />
                     }
                 </Template>
             </RadzenDataGridColumn>

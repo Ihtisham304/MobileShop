@@ -40,5 +40,34 @@ namespace AfaqMobileShop.Server.Controllers
             var user = _context.Users.SingleOrDefault(u=> u.UserName == userName && u.Password == password);
             return user;
         }
+        [HttpPost("ChangePassword")]
+        public  IActionResult ChangePass([FromBody] ChangePasswordDTO model)
+        {
+            var user =  _context.Users.FirstOrDefault(u => u.UserName == model.UserName);
+             if(user != null)
+            {
+                if (user.Password == model.CurrentPassword)
+                {
+                    user.Password = model.CurrentPassword;
+                }
+                _context.SaveChanges();
+                return Ok(new APIResponseDTO()
+                {
+                    IsSuccess = true,
+                    Message = "Password Change SuccessFully"
+                });
+            }
+            return Ok(new APIResponseDTO()
+            {
+                IsSuccess = false,
+                Message = "Current Password Does't Match"
+            });
+            return Ok(new APIResponseDTO()
+            {
+                IsSuccess = false,
+                Message = "There is a Issue Changing password please contact with Developer"
+            });
+        }
+
     }
 }

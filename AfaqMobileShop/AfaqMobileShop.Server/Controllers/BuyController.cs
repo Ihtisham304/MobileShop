@@ -18,13 +18,19 @@ namespace AfaqMobileShop.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BuyDTO>>> GetBuyers()
         {
-            var Buyers =  _context.Buying.ToList();
+            var Buyers =   _context.Buying.ToList();
             return Ok(Buyers);
+        }
+        [HttpGet("totalbuying")]
+        public async Task<IActionResult> GetTotalBuyers()
+        {
+            var totalBuyers = await _context.Buying.CountAsync();
+            return Ok(totalBuyers);
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<BuyDTO>> GetBuy(int id)
         {
-            var Buy = _context.Buying.SingleOrDefaultAsync(b=> b.Id == id);
+            var Buy = await _context.Buying.SingleOrDefaultAsync(b=> b.Id == id);
             if(Buy == null)
             {
                 return NotFound();
@@ -49,7 +55,7 @@ namespace AfaqMobileShop.Server.Controllers
             _context.Entry(buy).State = EntityState.Modified;
             try
             {
-                _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return Ok(buy);
             }
             catch(DbUpdateConcurrencyException)

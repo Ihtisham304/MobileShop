@@ -35,6 +35,12 @@ namespace AfaqMobileShop.Server.Controllers
             }
             return Ok(sale);
         }
+        [HttpGet("totalselling")]
+        public async Task<IActionResult> GetTotalSales()
+        {
+            var totalSell = await _context.Sales.CountAsync();
+            return Ok(totalSell);
+        }
         [HttpPost]
         public async Task<ActionResult<Sell>> CreateSale(Sell sell)
         {

@@ -1,4 +1,4 @@
-﻿@page "/AddStock"
+﻿@page "/Stocks"
 @using AfaqMobileShop.Desktop.Data
 @using AfaqMobileShop.Shared.DTO
 @using AfaqMobileShop.Shared.Models
@@ -24,8 +24,8 @@
 
 @code {
     RadzenDataGrid<Stock> grid;
-    IEnumerable<StockDTO> stocks;
-    IList<StockDTO> selectedStocks;
+    IEnumerable<Stock> stocks;
+    IList<Stock> selectedStocks;
     List<Stock> _stock;
     protected override async Task OnInitializedAsync()
     {
