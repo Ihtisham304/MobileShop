@@ -35,7 +35,8 @@ namespace AfaqMobileShop.Desktop.Data
     public class ServerContext : IServerContext
     {
         private readonly HttpClient _httpClient;
-        public static string ServerBaseUrl = "https://localhost:7101/";
+       /* public static string ServerBaseUrl = "https://localhost:7101/";*/
+        public static string ServerBaseUrl = "http://localhost:2025/";
 
         public ServerContext(HttpClient httpClient)
         {
